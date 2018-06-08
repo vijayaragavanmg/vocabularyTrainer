@@ -59,20 +59,16 @@ extension LessonCompletionVC {
         activityIndicator.isHidden = false
         activityIndicator.startAnimating()
         
-        DispatchQueue.global(qos: .userInitiated).async {
-            
-            CoreDataManager.loadVocabularyData(lessonNumber: self.level+1, completion: { (status,error) in
-                if status == true {
-                    DispatchQueue.main.async {
-                        self.activityIndicator.stopAnimating()
-                        self.delegate?.loadVocabularies()
-                        self.dismiss(animated: true, completion: nil)
-                    }
-                    
-                }
-            })
-            
-        }
+        CoreDataManager.loadVocabularyData(lessonNumber: self.level+1, completion: { (status,error) in
+            if status == true {
+                
+                self.activityIndicator.stopAnimating()
+                self.delegate?.loadVocabularies()
+                self.dismiss(animated: true, completion: nil)
+                
+            }
+        })
+        
     }
     
 }

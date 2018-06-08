@@ -262,6 +262,7 @@ extension VocabularyViewController {
     @IBAction func evaluationAction(_ sender: Any) {
         
         guard let count = englisWordTextField.text?.count,count > 0 else {
+            Utility.showAlertWithTitle(nil, alertMessage: "Please Enter English Word!", dismissButtonsTitle: "Ok", inController: self, andActions: nil)
             return
         }
         

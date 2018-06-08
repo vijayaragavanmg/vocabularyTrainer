@@ -20,6 +20,7 @@ private struct Constants {
     static let finished             = "Finished"
     static let wrongImage           = "wrong"
     static let correctImage         = "correct"
+    static let maxSuccess           = 4
     
 }
 
@@ -61,7 +62,7 @@ class VocabularyViewController: UIViewController,LessonCompletionDelegate {
             if vocabularies.count > 0 {
                 level = Int(vocabularies[0].level)
             }
-            self.vocabularies = vocabularies.filter{$0.count < 4}
+            self.vocabularies = vocabularies.filter{$0.count < Constants.maxSuccess}
             
             if self.vocabularies.count > 0 {
                 let vocabulary = vocabularies[0]
@@ -91,7 +92,7 @@ class VocabularyViewController: UIViewController,LessonCompletionDelegate {
             
             let randomNum = Int(arc4random_uniform(UInt32(vocabularies.count)))
             let vocabulary = vocabularies[randomNum]
-            if vocabulary.count < 4 && !generatedNumber.contains(randomNum){
+            if vocabulary.count < Constants.maxSuccess && !generatedNumber.contains(randomNum){
                 germanWordLabel.text = vocabulary.german
                 answer = vocabulary.english
                 isVocabularySelected = true
@@ -111,7 +112,7 @@ class VocabularyViewController: UIViewController,LessonCompletionDelegate {
         var count = 0
         var level = 0
         for vocabulary in vocabularies {
-            if vocabulary.count < 4 {
+            if vocabulary.count < Constants.maxSuccess {
                 count += 1
             }
             level = Int(vocabulary.level)
@@ -216,7 +217,7 @@ class VocabularyViewController: UIViewController,LessonCompletionDelegate {
             let vocabulary = vocabularies[index]
             vocabulary.count -= 1
             updateSuccessCount()
-            let count = vocabularies.filter{$0.count < 4}.count
+            let count = vocabularies.filter{$0.count < Constants.maxSuccess}.count
             if generatedNumber.count == count  {
                 evaluationButton.isUserInteractionEnabled = false
                 let delayInSeconds = 1.0

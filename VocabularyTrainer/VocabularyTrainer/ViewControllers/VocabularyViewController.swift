@@ -58,9 +58,6 @@ class VocabularyViewController: UIViewController,LessonCompletionDelegate {
         answer = nil
         if let vocabularies = CoreDataManager.getLesson() {
             
-            for vocabulary in vocabularies {
-                print("=====>",vocabulary.level,"========",vocabulary.count)
-            }
             if vocabularies.count > 0 {
                 level = Int(vocabularies[0].level)
             }

@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		5004515320CB06CD00D47062 /* Utility.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5004515220CB06CD00D47062 /* Utility.swift */; };
 		50E1FCF520CA7CD900B7538B /* VocabularyViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50E1FCF320CA7CD900B7538B /* VocabularyViewController.swift */; };
 		50E1FCF820CA7D0800B7538B /* SummaryVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50E1FCF720CA7D0800B7538B /* SummaryVC.swift */; };
 		50E1FCFA20CA7D2700B7538B /* UIView+View.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50E1FCF920CA7D2700B7538B /* UIView+View.swift */; };
@@ -42,6 +43,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		5004515220CB06CD00D47062 /* Utility.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Utility.swift; sourceTree = "<group>"; };
 		50E1FCF320CA7CD900B7538B /* VocabularyViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = VocabularyViewController.swift; sourceTree = "<group>"; };
 		50E1FCF720CA7D0800B7538B /* SummaryVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SummaryVC.swift; sourceTree = "<group>"; };
 		50E1FCF920CA7D2700B7538B /* UIView+View.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIView+View.swift"; sourceTree = "<group>"; };
@@ -105,6 +107,7 @@
 			children = (
 				50E1FCF920CA7D2700B7538B /* UIView+View.swift */,
 				50E1FCFB20CA7D3A00B7538B /* CoreDataManager.swift */,
+				5004515220CB06CD00D47062 /* Utility.swift */,
 			);
 			path = Utility;
 			sourceTree = "<group>";
@@ -316,6 +319,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				5004515320CB06CD00D47062 /* Utility.swift in Sources */,
 				50E1FD0720CA7F7A00B7538B /* Lesson.swift in Sources */,
 				50E1FCFC20CA7D3A00B7538B /* CoreDataManager.swift in Sources */,
 				50E1FD0620CA7F7A00B7538B /* Lesson+CoreDataProperties.swift in Sources */,

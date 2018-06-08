@@ -24,7 +24,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         
         //Initiate to preload vocabularies
         let defaults = UserDefaults.standard
-        //        defaults.set(false, forKey: "isPreloaded")
         let isPreloaded = defaults.bool(forKey: "isPreloaded")
         if !isPreloaded {
             CoreDataManager.loadVocabularyData(lessonNumber: 1, completion: { (status,error) in

@@ -29,17 +29,17 @@ class CoreDataManager: NSObject {
         return instance
     }()
     
-   private lazy var applicationDocumentsDirectory: NSURL = {
+    private lazy var applicationDocumentsDirectory: NSURL = {
         let urls = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)
         return urls[urls.count-1] as NSURL
     }()
     
-   private lazy var managedObjectModel: NSManagedObjectModel = {
+    private lazy var managedObjectModel: NSManagedObjectModel = {
         let modelURL = Bundle.main.url(forResource: Constants.coreDataFile, withExtension: Constants.coreDataFileExtension)!
         return NSManagedObjectModel(contentsOf: modelURL)!
     }()
     
-   private lazy var persistentStoreCoordinator: NSPersistentStoreCoordinator = {
+    private lazy var persistentStoreCoordinator: NSPersistentStoreCoordinator = {
         let coordinator = NSPersistentStoreCoordinator(managedObjectModel: self.managedObjectModel)
         let url = self.applicationDocumentsDirectory.appendingPathComponent(Constants.sqlLiteFile)
         var failureReason = "There was an error creating or loading the application's saved data."
@@ -69,7 +69,7 @@ class CoreDataManager: NSObject {
     
     // Load the CSV file and parse it
     class func parseCSV (contentsOfURL: URL, encoding: String.Encoding, error: NSErrorPointer) -> [(german:String, english:String, count: String)]? {
-       
+        
         let delimiter = ";"
         var items:[(german:String, english:String, count: String)]?
         
@@ -134,15 +134,33 @@ class CoreDataManager: NSObject {
             //Remove all the vocabularies before preloading
             removeData()
             
-            var error:NSError?
+            if lessonNumber > 1 {
+                parseCSVFileInBackground(fileUrl: contentsOfURL, lessonNumber: lessonNumber, completion: { (status,error) in
+                    completion(status, error)
+                })
+            }else {
+                parseCSVFileInMain(fileUrl: contentsOfURL, lessonNumber: lessonNumber, completion: { (status,error) in
+                    completion(status, error)
+                })
+            }
             
-            if let items = parseCSV(contentsOfURL: contentsOfURL, encoding: .utf8, error: &error) {
+        }
+    }
+    
+    
+    //Parsing CSV File in background thread
+    class func parseCSVFileInBackground(fileUrl:URL,lessonNumber:Int, completion: @escaping (_ status: Bool, _ error:NSError?) -> ()) {
+        
+        DispatchQueue.global(qos: .background).async {
+            
+            var error:NSError?
+            if let items = parseCSV(contentsOfURL: fileUrl, encoding: .utf8, error: &error) {
                 // Preload the vocabularies
-                
-                for (index,item) in items.enumerated() {
-                    if index > 0 {
-                        
-                        let managedObjectContext = CoreDataManager.shared.managedObjectContext 
+                DispatchQueue.main.async {
+                    for (index,item) in items.enumerated() {
+                        if index > 0 {
+                            
+                            let managedObjectContext = CoreDataManager.shared.managedObjectContext
                             let menuItem = NSEntityDescription.insertNewObject(forEntityName: Constants.entityName, into: managedObjectContext) as! Lesson
                             menuItem.german = item.german.trimmingCharacters(in: .whitespacesAndNewlines)
                             menuItem.english = item.english.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -155,11 +173,44 @@ class CoreDataManager: NSObject {
                                 print("insert error: \(error.localizedDescription)")
                                 completion(false, error as NSError)
                             }
-                        
+                            
+                        }
                     }
                 }
             }
         }
+        
+    }
+    
+    
+    //Parsing CSV File in main thread
+    class func parseCSVFileInMain(fileUrl:URL,lessonNumber:Int, completion: @escaping (_ status: Bool, _ error:NSError?) -> ()) {
+        
+        var error:NSError?
+        if let items = parseCSV(contentsOfURL: fileUrl, encoding: .utf8, error: &error) {
+            // Preload the vocabularies
+            for (index,item) in items.enumerated() {
+                if index > 0 {
+                    
+                    let managedObjectContext = CoreDataManager.shared.managedObjectContext
+                    let menuItem = NSEntityDescription.insertNewObject(forEntityName: Constants.entityName, into: managedObjectContext) as! Lesson
+                    menuItem.german = item.german.trimmingCharacters(in: .whitespacesAndNewlines)
+                    menuItem.english = item.english.trimmingCharacters(in: .whitespacesAndNewlines)
+                    menuItem.count = Int64((item.count as NSString).integerValue)
+                    menuItem.level = Int64(lessonNumber)
+                    do{
+                        try managedObjectContext.save()
+                        completion(true, nil)
+                    }catch {
+                        print("insert error: \(error.localizedDescription)")
+                        completion(false, error as NSError)
+                    }
+                    
+                }
+            }
+            
+        }
+        
     }
     
     
@@ -184,16 +235,16 @@ class CoreDataManager: NSObject {
         // Remove the existing items
         let fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: Constants.entityName)
         
-         let managedObjectContext = CoreDataManager.shared.managedObjectContext
-            do {
-                
-                let menuItems =  try managedObjectContext.fetch(fetchRequest) as! [Lesson]
-                for menuItem in menuItems {
-                    managedObjectContext.delete(menuItem)
-                }
-            }catch {
-                print("Failed to retrieve record:")
+        let managedObjectContext = CoreDataManager.shared.managedObjectContext
+        do {
+            
+            let menuItems =  try managedObjectContext.fetch(fetchRequest) as! [Lesson]
+            for menuItem in menuItems {
+                managedObjectContext.delete(menuItem)
             }
+        }catch {
+            print("Failed to retrieve record:")
+        }
         
     }
     
@@ -201,16 +252,16 @@ class CoreDataManager: NSObject {
     //Retrives all vocabularies
     class func getLesson() -> [Lesson]? {
         
-         let managedObjectContext = CoreDataManager.shared.managedObjectContext
-            
-            let fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: Constants.entityName)
-            do {
-                let vocabularies = try managedObjectContext.fetch(fetchRequest) as! [Lesson]
-                return vocabularies
-            } catch {
-                print("Failed to retrieve record")
-                print(error)
-            }
+        let managedObjectContext = CoreDataManager.shared.managedObjectContext
+        
+        let fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: Constants.entityName)
+        do {
+            let vocabularies = try managedObjectContext.fetch(fetchRequest) as! [Lesson]
+            return vocabularies
+        } catch {
+            print("Failed to retrieve record")
+            print(error)
+        }
         
         return nil
         

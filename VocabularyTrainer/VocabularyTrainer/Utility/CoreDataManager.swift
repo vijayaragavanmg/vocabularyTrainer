@@ -146,7 +146,6 @@ class CoreDataManager: NSObject {
                             let menuItem = NSEntityDescription.insertNewObject(forEntityName: Constants.entityName, into: managedObjectContext) as! Lesson
                             menuItem.german = item.german.trimmingCharacters(in: .whitespacesAndNewlines)
                             menuItem.english = item.english.trimmingCharacters(in: .whitespacesAndNewlines)
-//                          menuItem.count = Int64(4)
                             menuItem.count = Int64((item.count as NSString).integerValue)
                             menuItem.level = Int64(lessonNumber)
                             do{

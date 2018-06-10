@@ -60,12 +60,15 @@ extension LessonCompletionVC {
         activityIndicator.startAnimating()
         
         CoreDataManager.loadVocabularyData(lessonNumber: self.level+1, completion: { (status,error) in
+            self.activityIndicator.stopAnimating()
             if status == true {
-                
-                self.activityIndicator.stopAnimating()
                 self.delegate?.loadVocabularies()
                 self.dismiss(animated: true, completion: nil)
                 
+            }else {
+                if let _ = error?.localizedDescription {
+                    Utility.showAlertWithTitle("Error", alertMessage: error?.localizedDescription, dismissButtonsTitle: "Ok", inController: self, andActions: nil)
+                }
             }
         })
         

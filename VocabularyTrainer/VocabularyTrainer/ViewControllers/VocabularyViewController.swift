@@ -13,8 +13,6 @@ private struct Constants {
     
     static let title                = "Lesson: %d"
     static let evaluate             = "Evaluate"
-    static let summaryVC            = "summaryVC"
-    static let lessonCompletionVC   = "lessonCompletionVC"
     static let next                 = "Next"
     static let correct              = "Correct"
     static let finished             = "Finished"
@@ -44,12 +42,19 @@ class VocabularyViewController: UIViewController,LessonCompletionDelegate {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        loadVocabularies()
+        CoreDataManager.isNewLessonRequired(completion: { (isRequired, level) in
+            if isRequired == true {
+                self.displaySuccessVC(successLevel: level)
+            }else {
+                self.loadVocabularies()
+            }
+        })
         
     }
     
     //Fetch vocabularies from database
     func loadVocabularies()  {
+        
         correctAnswerCount = 0
         wrongAnswerCount = 0
         englisWordTextField.borderColor = UIColor.clear
@@ -57,19 +62,24 @@ class VocabularyViewController: UIViewController,LessonCompletionDelegate {
         generatedNumber.removeAll()
         lastSelectedIndex = nil
         answer = nil
-        if let vocabularies = CoreDataManager.getLesson() {
-            
-            if vocabularies.count > 0 {
-                level = Int(vocabularies[0].level)
+        CoreDataManager.getLesson(completion: {
+            (status,error,vocabularies)  in
+            if let vocabularies = vocabularies,status == true {
+                if vocabularies.count > 0 {
+                    self.level = Int(vocabularies[0].level)
+                }
+                self.vocabularies = vocabularies.filter{$0.count < Constants.maxSuccess}
+                
+                if self.vocabularies.count > 0 {
+                    let vocabulary = vocabularies[0]
+                    self.title = String(format: Constants.title, vocabulary.level)
+                }
+                self.displayVocabulary()
+            }else {
+                Utility.showAlertWithTitle("Error", alertMessage: error?.localizedDescription, dismissButtonsTitle: "Ok", inController: self, andActions: nil)
             }
-            self.vocabularies = vocabularies.filter{$0.count < Constants.maxSuccess}
-            
-            if self.vocabularies.count > 0 {
-                let vocabulary = vocabularies[0]
-                title = String(format: Constants.title, vocabulary.level)
-            }
-            displayVocabulary()
-        }
+        })
+        
     }
     
     
@@ -83,9 +93,10 @@ class VocabularyViewController: UIViewController,LessonCompletionDelegate {
         evaluationButton.setTitle(Constants.evaluate, for: .normal)
         
         if vocabularies.count == 0 {
-            displaySuccessVC(successLevel: level)
+            evaluationButton.isEnabled = false
             return
         }
+        evaluationButton.isEnabled = true
         var isVocabularySelected = false
         
         while isVocabularySelected == false {
@@ -102,7 +113,6 @@ class VocabularyViewController: UIViewController,LessonCompletionDelegate {
                 break
             }
         }
-        
         
     }
     
@@ -132,7 +142,7 @@ class VocabularyViewController: UIViewController,LessonCompletionDelegate {
     
     //Display summary viewcontroller
     func displaySummaryVC(level:Int) {
-        let summaryVC = self.storyboard?.instantiateViewController(withIdentifier: Constants.summaryVC) as! SummaryVC
+        let summaryVC = self.storyboard?.instantiateViewController(withIdentifier: SegueIdentifier.summaryVC) as! SummaryVC
         summaryVC.delegate = self
         summaryVC.wrongAnswerCount = wrongAnswerCount
         summaryVC.correctAnswerCount = correctAnswerCount
@@ -144,7 +154,7 @@ class VocabularyViewController: UIViewController,LessonCompletionDelegate {
     
     //Display lesson completion viewcontroller
     func displaySuccessVC(successLevel:Int) {
-        let lessonCompletionVC = self.storyboard?.instantiateViewController(withIdentifier: Constants.lessonCompletionVC) as! LessonCompletionVC
+        let lessonCompletionVC = self.storyboard?.instantiateViewController(withIdentifier: SegueIdentifier.lessonCompletionVC) as! LessonCompletionVC
         lessonCompletionVC.delegate = self
         lessonCompletionVC.level = successLevel
         let navController = UINavigationController(rootViewController: lessonCompletionVC)
@@ -167,12 +177,10 @@ class VocabularyViewController: UIViewController,LessonCompletionDelegate {
     
     //Restart lession
     func restartLesson() {
+        
         if isFinished() == false {
             loadVocabularies()
-        }else {
-            displaySuccessVC(successLevel: level)
         }
-        
     }
     
     

@@ -29,6 +29,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             CoreDataManager.loadVocabularyData(lessonNumber: 1, completion: { (status,error) in
                 if status == true {
                     defaults.set(true, forKey: "isPreloaded")
+                }else {
+                    Utility.showAlertWithTitle("Error", alertMessage: error?.localizedDescription, dismissButtonsTitle: "Ok", inController: nil, andActions: nil)
                 }
             })
             
